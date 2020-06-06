@@ -437,6 +437,53 @@ AddEventHandler("test_lols", function(name, amount , target ,hash)
 
 end)
 
+RegisterServerEvent("SaveItemServerEvent")
+AddEventHandler("SaveItemServerEvent", function(name, amount , target ,hash)
+    local _target = target
+    local _source = source
+    local _name = name
+    local _amount = amount
+    local all
+    if hash == 1 then
+        local value = inventory.checkItem(_source, name)
+        all = value-amount
+    else
+        all = amount
+    end
+    if all >= 0 then
+        TriggerEvent("item:delete",_source, { name , amount})
+        TriggerEvent("item:add",_target, {name, amount, hash})
+        TriggerClientEvent('gui:ReloadMenu', _source)
+        TriggerClientEvent('gui:ReloadMenu', _target)
+        local DisplayName2 =  name
+        if hash == 1 then
+            if Config.Labels[name] ~= nil then
+                DisplayName2 = Config.Labels[name]
+            end
+        else
+            DisplayName2 = GetLabelTextByHash(hash)
+        end
+        TriggerClientEvent("pNotify:SendNotification",_source, {
+            text = "<img src='nui://redemrp_inventory/html/img/items/"..name..".png' height='40' width='40' style='float:left; margin-bottom:10px; margin-left:20px;' />You gave: ".. DisplayName2.."<br>-"..tonumber(amount).."<br>for "..GetPlayerName(_target),
+            type = "success",
+            timeout = math.random(2000, 3000),
+            layout = "centerRight",
+            queue = "right"
+        })
+        TriggerClientEvent("pNotify:SendNotification",_target, {
+            text = "<img src='nui://redemrp_inventory/html/img/items/"..name..".png' height='40' width='40' style='float:left; margin-bottom:10px; margin-left:20px;' />You got: ".. DisplayName2.."<br>+"..tonumber(amount).."<br>from "..GetPlayerName(_source),
+            type = "success",
+            timeout = math.random(2000, 3000),
+            layout = "centerRight",
+            queue = "right"
+        })
+
+    else
+        print("nie ma przedmiotu")
+    end
+
+end)
+
 
 function checkItem(_source, name)
     local value = 0

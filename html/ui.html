@@ -140,6 +140,28 @@
       }
     }
 
+    function saveGetHowMany(item, type ,hash) {
+      if (type != "item_weapon") {
+        dialog.prompt({
+          title: "Amount",
+          button: "Accept",
+          required: false,
+          item: item,
+          type: type,
+          input: {
+            type: "number"
+          },
+          validate: function (value, item, type) {
+            $.post("http://redemrp_inventory/SaveItem", JSON.stringify({ type: type, what: "save", item: item, count: value }));
+            return true;
+          }
+        });
+      }
+      else {
+        $.post("http://redemrp_inventory/SaveItem", JSON.stringify({ type: type, what: "save", item: item, hash: hash }));
+      }
+    }
+
     function closeInventory() {
       $.post("http://redemrp_inventory/NUIFocusOff", JSON.stringify({}));
 	  show22 = false;
@@ -180,6 +202,13 @@
             text: "Drop",
             action: function () {
               dropGetHowMany(item.name, item.type , item.hash);
+            }
+          });
+
+          data.push({
+            text: "save",
+            action: function () {
+              saveGetHowMany(item.name, item.type, item.hash);
             }
           });
         }
