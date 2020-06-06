@@ -401,15 +401,11 @@ end)
 RegisterNUICallback('SaveItem', function(data, cb)
     local playerPed = PlayerPedId()
     local players = GetClosestPlayer()
-
-    for i=1, #players, 1 do
-        if players[i] ~= PlayerId() then
-            if GetPlayerServerId(players[i]) == data.player then
-                local name = tostring(data.data.item)
-                local amount = tonumber(data.data.count)
-                local hash = tonumber(data.data.hash)
+                local name = tostring(data.item)
+                local amount = tonumber(data.count)
+                local hash = tonumber(data.hash)
                 local target = tonumber(data.player)
-                if data.data.type == "item_standard" then
+                if data.type == "item_standard" then
             if amount > 0 then
                        local test = 1
                            TriggerServerEvent('SaveItemServerEvent', name, amount, target , test)
@@ -418,10 +414,6 @@ RegisterNUICallback('SaveItem', function(data, cb)
                     TriggerServerEvent('SaveItemServerEvent', name, GetAmmoInPedWeapon(PlayerPedId(), tonumber(hash)), target , hash)
             RemoveWeaponFromPed(PlayerPedId(), hash , true)
                 end
-                break
-            end
-        end
-    end
 end)
 
 function shouldSkipAccount (accountName)
