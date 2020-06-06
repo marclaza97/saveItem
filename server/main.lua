@@ -145,6 +145,57 @@ AddEventHandler('player:savInvSv', function(source, data)
     end)
 end)
 
+RegisterServerEvent("player:savChestSv")
+AddEventHandler('player:savChestSv', function(source, data)
+    local _source = source
+    local _data = data
+    local eq
+    TriggerEvent('redemrp:getPlayerFromId', _source, function(user)
+        if user ~= nil then
+            local identifier = user.getIdentifier()
+            local charid = user.getSessionVar("charid")
+            --print(identifier)
+            for i,k in pairs(invTable) do
+                if k.id == identifier and k.charid == charid then
+                    eq = k.inventory
+                    local liczba_itemow = 0
+                    for name,value in pairs(k.inventory) do
+                        if name ~= nil then
+                            liczba_itemow = liczba_itemow + 1
+                        end
+                        if liczba_itemow > 1 then
+                            if tonumber(value) ~= nil then
+                                if value < 1 then
+                                    eq[name] = nil
+                                end
+                            end
+                        end
+                    end
+                    if _data ~= nil then
+                        eq = _data
+                        k.inventory = _data
+                    end
+                    MySQL.Async.execute('UPDATE user_chest SET items = @items WHERE identifier = @identifier AND charid = @charid', {
+                        ['@identifier']  = identifier,
+                        ['@charid']  = charid,
+                        ['@items'] = json.encode(eq)
+                    }, function (rowsChanged)
+                        if rowsChanged == 0 then
+                            print(('user_inventory: Something went wrong saving %s!'):format(identifier .. ":" .. charid))
+                        else
+                            print("saved")
+                        end
+                    end)
+
+                    break
+
+                end
+            end
+        end
+
+    end)
+end)
+
 AddEventHandler('playerDropped', function()
     local _source = source
     print("Save Inventory ".._source)
@@ -275,6 +326,31 @@ AddEventHandler("item:delete", function(source, arg)
     end)
 end)
 
+AddEventHandler("item:save", function(source, arg)
+    local _source = source
+    local name = tostring(arg[1])
+    local amount = tonumber(arg[2])
+    TriggerEvent('redemrp:getPlayerFromId', _source, function(user)
+        local identifier = user.getIdentifier()
+        local charid = user.getSessionVar("charid")
+        for i,k in pairs(invTable) do
+            if k.id == identifier and k.charid == charid then
+                --if tonumber(invTable[i]["inventory"][name]) ~= nil then
+                    --local val = invTable[i]["inventory"][name]
+                    --newVal = val - amount
+                    --invTable[i]["inventory"][name]= tonumber(newVal)
+                --else
+                    --invTable[i]["inventory"][name]= nil
+                    --TriggerClientEvent("player:removeWeapon", _source, tonumber(amount) , hash )
+                --end
+                --TriggerClientEvent("gui:getItems", _source, k.inventory)
+                TriggerEvent("player:savChestSv", _source)
+                --TriggerClientEvent('gui:ReloadMenu', _source)
+                -- TriggerEvent("player:getCrafting", _source)
+                break end
+        end
+    end)
+end)
 
 RegisterServerEvent("item:onpickup")
 AddEventHandler("item:onpickup", function(id)
@@ -451,7 +527,7 @@ AddEventHandler("SaveItemServerEvent", function(name, amount ,hash)
     end
     if all >= 0 then
         TriggerEvent("item:delete",_source, { name , amount})
-        --TriggerEvent("item:save",_target, {name, amount, hash})
+        TriggerEvent("item:save",_target, {name, amount, hash})
         TriggerClientEvent('gui:ReloadMenu', _source)
         local DisplayName2 =  name
         if hash == 1 then
