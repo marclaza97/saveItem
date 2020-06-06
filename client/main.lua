@@ -404,14 +404,13 @@ RegisterNUICallback('SaveItem', function(data, cb)
                 local name = tostring(data.item)
                 local amount = tonumber(data.count)
                 local hash = tonumber(data.hash)
-                local target = tonumber(data.player)
                 if data.type == "item_standard" then
             if amount > 0 then
                        local test = 1
-                           TriggerServerEvent('SaveItemServerEvent', name, amount, target , test)
+                           TriggerServerEvent('SaveItemServerEvent', name, amount , test)
             end
                 else
-                    TriggerServerEvent('SaveItemServerEvent', name, GetAmmoInPedWeapon(PlayerPedId(), tonumber(hash)), target , hash)
+                    TriggerServerEvent('SaveItemServerEvent', name, GetAmmoInPedWeapon(PlayerPedId(), tonumber(hash)) , hash)
             RemoveWeaponFromPed(PlayerPedId(), hash , true)
                 end
 end)
